@@ -1,9 +1,8 @@
-import { battleshipPlayerOne, battleshipPlayerTwo } from ".";
 import Bot from "./ai";
 import setupDragEventListeners from "./drag-manager";
 import setupHitEventListeners from "./hit-event-listeners";
 
-function createDomBoard(player, parent, setup) {
+function createDomBoard({ player, parent, setup, playerOne, playerTwo }) {
   // function createDomBoard(player, player2, parent, setup) {
   // The board will be the GameBoard class, not the array of 10 arrays
 
@@ -19,23 +18,30 @@ function createDomBoard(player, parent, setup) {
         focus = player.board.coords(x, y);
       }
       if (!setup) {
-        if (
-          !(battleshipPlayerOne instanceof Bot) &&
-          !(battleshipPlayerTwo instanceof Bot)
-        ) {
-          if (player === battleshipPlayerOne && battleshipPlayerOne.canHit) {
+        if (!(playerOne instanceof Bot) && !(playerTwo instanceof Bot)) {
+          if (player === playerOne && playerOne.canHit) {
             focus = player.board.coords(x, y);
           }
-          if (player === battleshipPlayerTwo && battleshipPlayerOne.canHit) {
+          if (player === playerTwo && playerOne.canHit) {
             focus = player.showBoard().coords(x, y);
-            setupHitEventListeners(cell, [x, y]);
+            setupHitEventListeners({
+              cell,
+              coordinates: [x, y],
+              playerOne,
+              playerTwo,
+            });
           }
-          if (player === battleshipPlayerTwo && battleshipPlayerTwo.canHit) {
+          if (player === playerTwo && playerTwo.canHit) {
             focus = player.board.coords(x, y);
           }
-          if (player === battleshipPlayerOne && battleshipPlayerTwo.canHit) {
+          if (player === playerOne && playerTwo.canHit) {
             focus = player.showBoard().coords(x, y);
-            setupHitEventListeners(cell, [x, y]);
+            setupHitEventListeners({
+              cell,
+              coordinates: [x, y],
+              playerOne,
+              playerTwo,
+            });
           }
         }
       }
@@ -50,10 +56,21 @@ function createDomBoard(player, parent, setup) {
       }
       // if (setup) setupDragEventListeners(cell, player, player2, [x, y]);
       if (setup) {
-        setupDragEventListeners(cell, player, [x, y]);
+        setupDragEventListeners({
+          cell,
+          player,
+          coords: [x, y],
+          playerOne,
+          playerTwo,
+        });
       }
       if (player instanceof Bot) {
-        setupHitEventListeners(cell, [x, y]);
+        setupHitEventListeners({
+          cell,
+          coordinates: [x, y],
+          playerOne,
+          playerTwo,
+        });
       }
 
       parent.append(cell);
@@ -61,18 +78,24 @@ function createDomBoard(player, parent, setup) {
   }
 }
 
-function clearDomBoard(parent) {
+function clearDomBoard({ parent }) {
   const domCells = [...parent.querySelectorAll(".cell")];
   domCells.forEach((domCell) => {
     parent.removeChild(domCell);
   });
 }
 
-function updateDomBoard(player, parent, setup = true) {
+function updateDomBoard({
+  player,
+  parent,
+  setup = true,
+  playerOne,
+  playerTwo,
+}) {
   // function updateDomBoard(player, player2, parent, setup = true) {
-  clearDomBoard(parent);
+  clearDomBoard({ parent });
   // createDomBoard(player, player2, parent, setup);
-  createDomBoard(player, parent, setup);
+  createDomBoard({ player, parent, setup, playerOne, playerTwo });
 }
 
 export default updateDomBoard;
